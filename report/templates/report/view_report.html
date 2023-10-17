@@ -1,0 +1,232 @@
+{% include 'navigation.html' %}
+{% include "base.html" %}
+
+{%block body %}
+
+<div class="container mt-5">
+    <h2>Reportes</h2>
+    <!-- En otras vistas -->   
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            {% if request.session.email %}
+            <h5 class="card-title">Hola</h5>
+            <p>Bienvenido, usuario : {{ request.session.user_email }}</p>
+            
+            <form id="filtroForm" method="post">
+                <!-- ... -->
+            </form>
+            {% else %}
+            <h5 class="card-title">Filtros</h5>
+            <p>Por favor, inicia sesión para acceder a esta sección.</p>
+            {% endif %}
+
+            <form id="filtroForm" method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        <label for="fechaInicio">Fecha de Inicio</label>
+                        <input type="date" class="form-control" id="fechaInicio" name="fechaInicio">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="fechaFin">Fecha Fin</label>
+                        <input type="date" class="form-control" id="fechaFin" name="fechaFin">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="usuario">Usuario</label>
+                        <select class="form-control" id="usuario" name="usuario">
+                            <option value="[TODOS]">Todos los usuarios</option>
+                            {% for user in usuarios %}
+                            <option value="{{ user }}">{{ user }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <!-- Agrega más campos de filtro según sea necesario -->
+                </div> <br>
+                <button type="submit" class="btn btn-primary">Consultar</button>
+                <button style="float: right;" type="button" class="btn btn-success" id="mostrarTop10">Mostrar Top 10</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Resultados</h5>
+            <div class="table-responsive">
+                <table class="table table-striped" id="custom">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Usuario</th>
+                            <th>Llamado</th>
+                            <th>Destino</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Km Recorrido</th>
+                            <!-- <th>Fecha</th> -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in resultados %}
+                        <tr>
+                            <td>{{ result.0 }}</td>
+                            <td>{{ result.1 }}</td>
+                            <td>{{ result.2 }}</td>
+                            <td>{{ result.3 }}</td>
+                            <td>{{ result.4 }}</td>
+                            <td>{{ result.5 }}</td>
+                            <td>{{ result.6 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Valores Galones</h5>
+            <form id="valoresForm" method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="galones">Total de Galones</label>
+                        <input type="text" class="form-control" id="galones" name="galones" value="{{ galones }}"
+                            readonly>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="depreciacion">Depreciacion (Q)</label>
+                        <input type="text" class="form-control" id="depreciacion" name="depreciacion"
+                            value="{{depreciacion}}" readonly>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="contador">Registro visitas</label>
+                        <input type="text" class="form-control" id="contador" name="contador" value="{{ contador }}"
+                            readonly>
+                    </div>
+                </div>
+                <!-- <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label for="galonesNuevo">Galones KM/H (Nuevo)</label>
+                        <input type="text" class="form-control" id="galonesNuevo" name="galonesNuevo">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="depreciacionNuevo">Depreciacion/KM (Nuevo)</label>
+                        <input type="text" class="form-control" id="depreciacionNuevo" name="depreciacionNuevo">
+                    </div>
+                </div> -->
+                <!-- <button type="submit" class="btn btn-primary">Actualizar</button> -->
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+<script>
+    let spanishLanguage = {
+        "sProcessing": "Procesando...",
+        "sLengthMenu": "Mostrar _MENU_ registros",
+        "sZeroRecords": "No se encontraron resultados",
+        "sEmptyTable": "Ningún dato disponible en esta tabla",
+        "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+        "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+        "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+        "sInfoPostFix": "",
+        "sSearch": "Buscar:",
+        "sUrl": "",
+        "sInfoThousands": ",",
+        "sLoadingRecords": "Cargando...",
+        "oPaginate": {
+            "sFirst": "Primero",
+            "sLast": "Último",
+            "sNext": "Siguiente",
+            "sPrevious": "Anterior"
+        },
+        "oAria": {
+            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+        }
+    };
+
+    $('#custom').DataTable({
+        // "aaSorting": [
+        //     [1, 'asc']
+        // ],
+        "language": spanishLanguage,
+        dom: 'Bfrtip',
+        buttons: [{
+            extend: 'copy',
+            text: '<i class="bi bi-files"></i>',
+            titleAttr: 'Copiar'
+        },
+        {
+            extend: 'excel',
+            text: '<i class="bi bi-file-earmark-excel"></i>',
+            titleAttr: 'Exportar a Excel'
+        },
+        {
+            extend: 'pdf',
+            text: '<i class="bi bi-file-earmark-pdf"></i>',
+            titleAttr: 'Exportar a PDF'
+        },
+        {
+            extend: 'csv',
+            text: '<i class="bi bi-file-earmark-spreadsheet"></i>',
+            titleAttr: 'Exportar a CSV'
+        },
+        {
+            extend: 'print',
+            text: '<i class="bi bi-printer"></i>',
+            titleAttr: 'Imprimir'
+        }
+        ]
+    });
+</script>
+
+<script>
+    function consultar() {
+        const fechaInicio = document.getElementById('fechaInicio').value;
+
+        fetch(`/report/view_report/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({
+                fechaInicio: fechaInicio,
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if ('data' in data) {
+                    llenarResultados(data.data);
+                } else {
+                    console.error('Error en la consulta:', data.error);
+                }
+            })
+            .catch(error => console.error('Error en la solicitud AJAX:', error));
+    }
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return '';
+    }   
+</script>
+<script>
+    $(document).ready(function () {
+        $("#mostrarTop10").click(function () {
+            window.location.href = "{% url 'top_10' %}";
+        });
+    });
+</script>

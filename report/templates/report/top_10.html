@@ -1,0 +1,97 @@
+{% include 'navigation.html' %}
+{% include "base.html" %}
+
+{% block content %}
+<!-- En otras vistas -->
+
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Top 10 - Kilómetros Recorridos</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped" id="custom">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Usuario</th>
+                                <th>Kilómetros Recorridos</th>
+                                <!-- Agrega más columnas según tus necesidades -->
+                            </tr>
+                        </thead>
+                        <tbody>
+							{% for entry in top_10 %}
+								<tr>
+									<td>{{ forloop.counter }}</td>
+									<td>{{ entry.user }}</td>
+									<td>{{ entry.kmRecorrido|floatformat:3 }}</td>
+									<!-- Agrega más columnas según tus necesidades -->
+								</tr>
+							{% endfor %}
+						</tbody>					
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+<script>
+    let spanishLanguage = {
+		"sProcessing": "Procesando...",
+		"sLengthMenu": "Mostrar _MENU_ registros",
+		"sZeroRecords": "No se encontraron resultados",
+		"sEmptyTable": "Ningún dato disponible en esta tabla",
+		"sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+		"sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+		"sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+		"sInfoPostFix": "",
+		"sSearch": "Buscar:",
+		"sUrl": "",
+		"sInfoThousands": ",",
+		"sLoadingRecords": "Cargando...",
+		"oPaginate": {
+			"sFirst": "Primero",
+			"sLast": "Último",
+			"sNext": "Siguiente",
+			"sPrevious": "Anterior"
+		},
+		"oAria": {
+			"sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+			"sSortDescending": ": Activar para ordenar la columna de manera descendente"
+		}
+	};
+
+	$('#custom').DataTable({
+		// "aaSorting": [
+		// 	[1, 'asc']
+		// ],
+		"language": spanishLanguage,
+		dom: 'Bfrtip',
+		buttons: [{
+				extend: 'copy',
+				text: '<i class="bi bi-files"></i>',
+				titleAttr: 'Copiar'
+			},
+			{
+				extend: 'excel',
+				text: '<i class="bi bi-file-earmark-excel"></i>',
+				titleAttr: 'Exportar a Excel'
+			},
+			{
+				extend: 'pdf',
+				text: '<i class="bi bi-file-earmark-pdf"></i>',
+				titleAttr: 'Exportar a PDF'
+			},
+			{
+				extend: 'csv',
+				text: '<i class="bi bi-file-earmark-spreadsheet"></i>',
+				titleAttr: 'Exportar a CSV'
+			},
+			{
+				extend: 'print',
+				text: '<i class="bi bi-printer"></i>',
+				titleAttr: 'Imprimir'
+			}
+		]
+	});
+</script>
