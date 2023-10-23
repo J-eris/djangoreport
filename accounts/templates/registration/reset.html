@@ -1,0 +1,96 @@
+{% include 'navigation.html' %}
+{% include "base.html" %}
+<br>
+<div class="container">
+    <h2 class="text-center">CAMBIE SU CONTRASEÑA </h2>
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-4">
+            <form id="manage">
+                <div class="form-group">
+                    <input type="email" class="form-control" id="email" placeholder="Correo Electrónico" required>
+                </div>
+                <div class="form-group">
+                    <label for="generatedPassword">Contraseña Generada:</label>
+                    <input type="text" class="form-control" id="generatedPassword" readonly>
+                    <small id="passwordHelp" class="form-text text-muted">Haz clic en "Generar Contraseña" para obtener
+                        una nueva.</small> <br>
+                    <button type="button" class="btn btn-secondary mt-2" onclick="generatePassword()">Generar
+                        Contraseña</button>
+                </div> <br>
+                <div class="text-center">
+                    <button type="button" class="btn btn-primary mr-3" onclick="resetPassword()">Restablecer
+                        Contraseña</button>
+                    <a href="{% url 'login' %}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function generatePassword() {
+        var generatedPassword = generateRandomPassword();
+        document.getElementById('generatedPassword').value = generatedPassword;
+    }
+
+    function generateRandomPassword() {
+        var length = 10;
+        var charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        var password = '';
+        for (var i = 0; i < length; i++) {
+            var randomIndex = Math.floor(Math.random() * charset.length);
+            password += charset.charAt(randomIndex);
+        }
+        return password;
+    }
+
+    function start_load() {
+        console.log("Iniciando carga...");
+    }
+
+    function end_load() {
+        console.log("Finalizando carga...");
+    }
+
+    async function resetPassword() {
+        var email = document.getElementById('email').value;
+        console.log(email);
+        var newPassword = document.getElementById('generatedPassword').value;
+        console.log(newPassword);
+
+        if (!newPassword) {
+            alert('Genera una contraseña antes de restablecerla.');
+            return;
+        }
+
+        start_load();
+
+        try {
+            var response = await fetch('{% url "reset_password_api" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({ email, password: newPassword }),
+            });
+
+            var data = await response.json();
+
+            console.log("Respuesta del Servidor:", data);
+
+            if (data.status === 1) {
+                alert('Contraseña restablecida con éxito');
+                setTimeout(function () {
+                    location.href = '{% url "login" %}';
+                }, 2000);
+            } else if (data.status === 2) {
+                console.error('El correo electrónico no está registrado.');
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        } finally {
+            end_load();
+        }
+    }
+</script>

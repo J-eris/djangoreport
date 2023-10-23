@@ -1,11 +1,14 @@
+import json
 import firebase_admin
-
+from .utils import generateRandomPassword
 import warnings
 from firebase_admin import auth, firestore, db, credentials
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login, authenticate
 import hashlib
+from django.http import JsonResponse
+from django.contrib.auth.hashers import make_password
 
 warnings.filterwarnings("ignore", category=UserWarning, module="google.cloud.firestore")
 # firebase_admin.initialize_app()
@@ -126,4 +129,42 @@ def logout(request):
         messages.error(request, 'Error al cerrar sesión.')
 
     return redirect('login')
+
+def reset(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        generated_password = generateRandomPassword()
+
+        try:
+            # Cambiar la contraseña en Firestore
+            auth.send_password_reset_email(email)
+
+            messages.success(request, 'Se ha enviado un enlace para restablecer la contraseña al correo proporcionado.')
+            return redirect('login')
+        except Exception as e:
+            print(f'Error al restablecer la contraseña: {e}')
+            messages.error(request, 'Error al restablecer la contraseña. Verifica el correo electrónico.')
+
+    return render(request, 'registration/reset.html')
+
+def reset_password_api(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        new_password = data.get('password')
+
+        # Buscar el usuario por correo electrónico en Firestore
+        db = firestore.client()
+        user_ref = db.collection('user').where('email', '==', email).limit(1).stream()
+
+        if user_ref:
+            # Actualizar la contraseña del usuario en Firestore
+            user_ref = next(user_ref)
+            user_ref.reference.update({'password': hash_password(new_password)})
+
+            return JsonResponse({'status': 1})
+        else:
+            return JsonResponse({'status': 2})
+
+    return JsonResponse({'status': 0})
 

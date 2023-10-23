@@ -4,39 +4,64 @@
 {% block content %}
 <!-- En otras vistas -->
 
-    <div class="container mt-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Top 10 - Kilómetros Recorridos</h5>
-                <div class="table-responsive">
-                    <table class="table table-striped" id="custom">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th>#</th>
-                                <th>Usuario</th>
-                                <th>Kilómetros Recorridos</th>
-                                <!-- Agrega más columnas según tus necesidades -->
-                            </tr>
-                        </thead>
-                        <tbody>
-							{% for entry in top_10 %}
-								<tr>
-									<td>{{ forloop.counter }}</td>
-									<td>{{ entry.user }}</td>
-									<td>{{ entry.kmRecorrido|floatformat:3 }}</td>
-									<!-- Agrega más columnas según tus necesidades -->
-								</tr>
-							{% endfor %}
-						</tbody>					
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="container mt-4">
+	<div class="card">
+		<div class="card-body">
+			<h5 class="card-title">Top 10 - Mayores Kilómetros Recorridos</h5>
+			<div class="table-responsive">
+				<table class="table table-striped" id="custom">
+					<thead class="thead-dark">
+						<tr>
+							<th>#</th>
+							<th>Departamento de Ubicación</th>
+							<th>Municipio de Ubicación</th>
+							<th>Nombre de Tienda</th>
+							<th># Boleta</th>
+							<th>Nombre Tecnico</th>
+							<th>Fecha Inicio</th>
+							<!-- <th>Fecha Fin</th> -->
+							<th>Llamado</th>
+							<th>Kilometraje</th>
+							<th>Galones</th>
+							<th>Depreciacion</th>
+							<th>Inicio</th>
+							<th>Conclusion</th>
+							<th># Boleta Caf</th>
+							<th>Tipo de Servicio</th>
+							<!-- <th>Fecha</th> -->
+						</tr>
+					</thead>
+					<tbody>
+						{% for entry in top_10 %}
+						<tr>
+							<td>{{ forloop.counter }}</td>
+							<td>{{ entry.departamento }}</td>
+							<td>{{ entry.destino }}</td>
+							<td>{{ entry.idDestino }}</td>
+							<td>{{ entry.noBoleta }}</td>
+							<td>{{ entry.user }}</td>
+							<td>{{ entry.horaInicio }}</td>
+							<td>{{ entry.llamado }}</td>
+							<td>{{ entry.kmRecorrido }}</td>
+							<td>{{ entry.kmRecorrido }}</td>
+							<td>{{ entry.kmRecorrido }}</td>
+							<td>{{ entry.horaInicio }}</td>
+							<td>{{ entry.horaFin }}</td>
+							<td>{{ entry.boletaCaf }}</td>
+							<td>{{ entry.tipoServicio }}</td>
+							
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
 {% endblock %}
 
 <script>
-    let spanishLanguage = {
+	let spanishLanguage = {
 		"sProcessing": "Procesando...",
 		"sLengthMenu": "Mostrar _MENU_ registros",
 		"sZeroRecords": "No se encontraron resultados",
@@ -68,30 +93,30 @@
 		"language": spanishLanguage,
 		dom: 'Bfrtip',
 		buttons: [{
-				extend: 'copy',
-				text: '<i class="bi bi-files"></i>',
-				titleAttr: 'Copiar'
-			},
-			{
-				extend: 'excel',
-				text: '<i class="bi bi-file-earmark-excel"></i>',
-				titleAttr: 'Exportar a Excel'
-			},
-			{
-				extend: 'pdf',
-				text: '<i class="bi bi-file-earmark-pdf"></i>',
-				titleAttr: 'Exportar a PDF'
-			},
-			{
-				extend: 'csv',
-				text: '<i class="bi bi-file-earmark-spreadsheet"></i>',
-				titleAttr: 'Exportar a CSV'
-			},
-			{
-				extend: 'print',
-				text: '<i class="bi bi-printer"></i>',
-				titleAttr: 'Imprimir'
-			}
+			extend: 'copy',
+			text: '<i class="bi bi-files"></i>',
+			titleAttr: 'Copiar'
+		},
+		{
+			extend: 'excel',
+			text: '<i class="bi bi-file-earmark-excel"></i>',
+			titleAttr: 'Exportar a Excel'
+		},
+		{
+			extend: 'pdf',
+			text: '<i class="bi bi-file-earmark-pdf"></i>',
+			titleAttr: 'Exportar a PDF'
+		},
+		{
+			extend: 'csv',
+			text: '<i class="bi bi-file-earmark-spreadsheet"></i>',
+			titleAttr: 'Exportar a CSV'
+		},
+		{
+			extend: 'print',
+			text: '<i class="bi bi-printer"></i>',
+			titleAttr: 'Imprimir'
+		}
 		]
 	});
 </script>
