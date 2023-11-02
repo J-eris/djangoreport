@@ -107,8 +107,9 @@
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="8"></td>
+              <td colspan="7"></td>
               <td>Totales</td>
+              <td>{{ sumatoria_kms }}</td>
               <td>{{ sumatoria_glns }}</td>
               <td>{{ sumatoria_km }}</td>
               <td colspan="2"></td>
@@ -119,7 +120,6 @@
     </div>
   </div>
 
-
   <div class="card mt-4">
     <div class="card-body">
       <h5 class="card-title">Valores Galones</h5>
@@ -127,19 +127,20 @@
         {% csrf_token %}
         <div class="row">
           <div class="col-md-6">
-            <label for="galones">Total de Galones</label>
+            <label for="galones">Total de Galones</label> <i class="fas fa-gas-pump fa-lg mr-2 text-success"></i>
             <input type="text" class="form-control" id="galones" name="galones" value="{{ sumatoria_glns }}" readonly>
           </div>
 
           <div class="col-md-6">
-            <label for="depreciacion">Depreciacion Total (Q)</label>
+            <label for="depreciacion">Depreciacion Total (Q)</label> <i
+              class="fas fa-money-bill-wave fa-lg mr-2 text-warning"></i>
             <input type="text" class="form-control" id="depreciacion" name="depreciacion" value="{{sumatoria_km}}"
               readonly>
           </div>
         </div>
         <div class="row">
           <div class="col-md-6">
-            <label for="contador">Registro visitas</label>
+            <label for="contador">Registro visitas</label> <i class="fas fa-clipboard-list fa-lg mr-2 text-info"></i>
             <input type="text" class="form-control" id="contador" name="contador" value="{{ contador }}" readonly>
           </div>
         </div>
@@ -154,6 +155,30 @@
                     </div>
                 </div> -->
         <!-- <button type="submit" class="btn btn-primary">Actualizar</button> -->
+        <div class="row mt-4 justify-content-center">
+          <div class="col-md-6">
+            <h2>Top 5 de destinos más frecuentes <i class="fa fa-repeat text-warning"></i></h2>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ID Destino</th>
+                  <th>Frecuencia</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for destino, frecuencia in top_destinos %}
+                {% if frecuencia > 1 %}
+                <tr>
+                  <td>{{ destino }}</td>
+                  <td>{{ frecuencia }}</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </form>
     </div>
   </div>
@@ -200,28 +225,30 @@
       titleAttr: 'Copiar'
     },
     {
-            extend: 'excel',
-            text: '<i class="bi bi-file-earmark-excel"></i>',
-            titleAttr: 'Exportar a Excel',
-            title: 'Productividad - Fecha de Consulta: {{ fecha_inicio }} - {{ fecha_fin }}',
-            customize: function (xlsx) {
-                var sheet = xlsx.xl.worksheets['sheet1.xml'];
+      extend: 'excel',
+      text: '<i class="bi bi-file-earmark-excel"></i>',
+      titleAttr: 'Exportar a Excel',
+      title: 'Productividad - Fecha de Consulta: {{ fecha_inicio }} - {{ fecha_fin }}',
+      customize: function (xlsx) {
+        var sheet = xlsx.xl.worksheets['sheet1.xml'];
 
-                // Crea la fila de totales
-                var totalesRow = '<row>' +
-                    '<c t="inlineStr"><is><t>Totales Galones</t></is></c>' +
-                    '<c t="n"><v>' + '{{ sumatoria_glns }}' + '</v></c>' +
-                    '<c t="inlineStr"><is><t>Totales Depreciación</t></is></c>' +
-                    '<c t="n"><v>' + '{{ sumatoria_km }}' + '</v></c>' +
-                    '</row>';
+        // Crea la fila de totales
+        var totalesRow = '<row>' +
+          '<c t="inlineStr"><is><t>Totales Kilómetros</t></is></c>' +
+          '<c t="n"><v>' + '{{ sumatoria_kms }}' + '</v></c>' +
+          '<c t="inlineStr"><is><t>Totales Galones</t></is></c>' +
+          '<c t="n"><v>' + '{{ sumatoria_glns }}' + '</v></c>' +
+          '<c t="inlineStr"><is><t>Totales Depreciación</t></is></c>' +
+          '<c t="n"><v>' + '{{ sumatoria_km }}' + '</v></c>' +
+          '</row>';
 
-                // Encuentra la última fila en la hoja de trabajo
-                var lastRow = $('row', sheet).last();
+        // Encuentra la última fila en la hoja de trabajo
+        var lastRow = $('row', sheet).last();
 
-                // Agrega la fila de totales después de la última fila
-                $(lastRow).after(totalesRow);
-            }
-        },
+        // Agrega la fila de totales después de la última fila
+        $(lastRow).after(totalesRow);
+      }
+    },
     {
       extend: 'pdf',
       text: '<i class="bi bi-file-earmark-pdf"></i>',

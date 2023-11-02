@@ -6,6 +6,7 @@ import re
 from decimal import Decimal
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from collections import defaultdict
 
 # Create your views here.
 def getData(request):    
@@ -49,6 +50,8 @@ def view_report(request):
             contador_registros = 0
             sumatoria_glns = 0
             sumatoria_km = 0
+            sumatoria_kms = 0
+            id_destino_count = defaultdict(int)
 
             for row in data:
                 data_row = row.to_dict()
@@ -70,14 +73,20 @@ def view_report(request):
                     depreciacion = config_row_data.get('depreciacion', '')                    
                
                 if inserta_info:
+                    galones = config_row_data['galones']
+                    depreciacion = config_row_data['depreciacion']
                     km_rec_str = data_row['kmRecorrido']
                     numbers = re.findall(r'\d+\.\d+|\d+', km_rec_str)
+
                     if numbers:
-                      # Tomar el primer conjunto de números encontrado y convertirlo a entero
                       km_rec_num = Decimal(numbers[0])
-                      # Multiplicar por 2
-                      multiplied_km = round(km_rec_num * Decimal(2), 3)  
-                      multiplied_glns = round(km_rec_num * Decimal(0.5), 3)  
+                    #   print(f"Antes de conversión - Depreciacion: {depreciacion}, Galones: {galones}")
+                      depreciacion_entero = int(depreciacion) if depreciacion else 0
+                      galones_entero = int(galones) if galones else 0
+                      multiplied_km = round(km_rec_num * Decimal(depreciacion_entero), 3)
+                      multiplied_glns = round(km_rec_num / Decimal(galones_entero), 3) 
+
+                      id_destino_count[data_row['idDestino']] += 1
                     retorno.append([
                         contador,
                         data_row['departamento'],
@@ -101,15 +110,17 @@ def view_report(request):
                     contador_registros += 1
                     sumatoria_glns += multiplied_glns
                     sumatoria_km += multiplied_km
+                    sumatoria_kms += km_rec_num
+                    top_destinos = sorted(id_destino_count.items(), key=lambda x: x[1], reverse=True)[:5]
 
-                    galones = data_row.get('galones', '')
-                    depreciacion = data_row.get('depreciacion', '')
+                    # galones = data_row.get('galones', '')
+                    # depreciacion = data_row.get('depreciacion', '')
                     retorno[-1].extend([galones, depreciacion])            
 
             return render(request, 'report/view_report.html',
                           {'resultados': retorno, 'usuarios': usuarios, 'galones': galones, 
-                           'depreciacion': depreciacion, 'contador': contador_registros, 'sumatoria_glns': round(sumatoria_glns, 3),
-                            'sumatoria_km': round(sumatoria_km, 3), 'fecha_inicio': fecha_inicio, 'fecha_fin': fecha_fin})
+                           'depreciacion': depreciacion, 'contador': contador_registros, 'sumatoria_glns': round(sumatoria_glns, 3), 'top_destinos': top_destinos,
+                            'sumatoria_km': round(sumatoria_km, 3), 'sumatoria_kms': round(sumatoria_kms, 3), 'fecha_inicio': fecha_inicio, 'fecha_fin': fecha_fin})
 
     except Exception as e:
         return render(request, 'report/view_report.html', {'error': str(e)})
